@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Dominant Set:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Dominant_Set_jar</output-path>
+    <root id="archive" name="Dominant Set.jar">
+      <element id="module-output" name="Dominant Set" />
+    </root>
+  </artifact>
+</component>
