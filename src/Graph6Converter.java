@@ -19,7 +19,9 @@ public class Graph6Converter {
 		}
 		return graph;
  	}
-
+	public static boolean validate(String g) {
+		return g.length() != 0 && Character.isLetter(g.charAt(0));
+	}
 
 	 public static String bringToTheFrom(String what) {
 		int length = what.length();

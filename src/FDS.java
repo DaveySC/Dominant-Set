@@ -1,9 +1,10 @@
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
 public class FDS {
-	enum TypeOfGraph {DOMINANT, DEPENDENT, INDEPENDENT, NOT_DOMINANT};
+	enum TypeOfGraph {DOMINANT, DEPENDENT, INDEPENDENT};
 
 	private final boolean[][] graph;
 
@@ -13,8 +14,7 @@ public class FDS {
 
 	private final Set<Integer> dependentSet   = new TreeSet<>();
 
-	private final Set<Integer> dominantSet = new TreeSet<>();
-
+	private final Set<Integer> dominantSet    = new TreeSet<>();
 	public FDS(boolean[][] graph) {
 		this.graph = graph;
 		this.vertex = graph.length;
@@ -22,23 +22,16 @@ public class FDS {
 	}
 
 
-	public void findDominantSets() {
+	private void findDominantSets() {
 		for (int i = 0; i < 1 << vertex; i++) {
-			TypeOfGraph type = identifyTypeOfGraph(i);
-			if (type == TypeOfGraph.DEPENDENT) dependentSet.add(i);
-			if (type == TypeOfGraph.INDEPENDENT) independentSet.add(i);
-			if (type == TypeOfGraph.DOMINANT) dominantSet.add(i);
+			if (isDominant(i)) {
+				dominantSet.add(i);
+				if (isIndependent(i)) independentSet.add(i);
+				if (isDependent(i)) dependentSet.add(i);
+			}
 		}
 
 	}
-
-	private TypeOfGraph identifyTypeOfGraph(int n) {
-		if (!isDominant(n)) return TypeOfGraph.NOT_DOMINANT;
-		if (isIndependent(n)) return TypeOfGraph.INDEPENDENT;
-		if (isDependent(n)) return TypeOfGraph.DEPENDENT;
-		return TypeOfGraph.DOMINANT;
-	}
-
 
 	private boolean isDominant(int n) {
 		boolean[] adjacent = new boolean[vertex];
@@ -55,33 +48,32 @@ public class FDS {
 
 
 	private boolean getBitFromInt(int b, int position) {
-		return ((b & (1 << position)) >> position) == 1;
+		return ((b << ~position) < 0);
 	}
 
 	private boolean isIndependent(int n) {
-		boolean[] adjacent = new boolean[vertex];
-		for (int i = 0; i < vertex; i++) {
-			if (!getBitFromInt(n, i)) continue;
-			for (int j = 0; j < vertex; j++) {
-				if (graph[i][j]) adjacent[j] = true;
-			}
-		}
-
-		for (int i = 0; i < vertex; i++) {
-			if (getBitFromInt(n, i))
-				if (adjacent[i]) return false;
-		}
-
-		return true;
-	}
-
-	private boolean isDependent(int n) {
 		for (int i = 0; i < vertex; i++) {
 			if (!getBitFromInt(n, i)) continue;
 			for (int j = i + 1; j < vertex; j++) {
 				if (!getBitFromInt(n, j)) continue;
-				if (!graph[i][j]) return false;
+				if (graph[i][j] || graph[j][i]) return false;
 			}
+		}
+		return true;
+	}
+
+	private boolean isDependent(int n) {
+		boolean[] visited = new boolean[vertex];
+		for (int i = 0; i < vertex; i++) {
+			if (!getBitFromInt(n, i)) continue;
+			for (int j = 0; j < vertex; j++) {
+				if (!getBitFromInt(n, j) || i == j) continue;
+				if (graph[i][j]) visited[j] = true;
+			}
+		}
+		for (int i = 0; i < vertex; i++) {
+			if (!getBitFromInt(n, i)) continue;
+			if (!visited[i]) return false;
 		}
 		return true;
 	}
@@ -109,16 +101,22 @@ public class FDS {
 		System.out.print(str);
 	}
 
-
 	public int getDominantNumber() {
-		return dominantSet.size();
+		int min = Integer.MAX_VALUE;
+		for (int val : dominantSet) min = Math.min(min, Integer.bitCount(val));
+		return (min == Integer.MAX_VALUE) ? 0 : min;
 	}
 
+
 	public int getIndependentNumber() {
-		return independentSet.size();
+		int min = Integer.MAX_VALUE;
+		for (int val : independentSet) min = Math.min(min, Integer.bitCount(val));
+		return (min == Integer.MAX_VALUE) ? 0 : min;
 	}
 
 	public int getDependentNumber() {
-		return dependentSet.size();
+		int min = Integer.MAX_VALUE;
+		for (int val : dependentSet) min = Math.min(min, Integer.bitCount(val));
+		return (min == Integer.MAX_VALUE) ? 0 : min;
 	}
 }
