@@ -32,6 +32,7 @@ public class Application {
 	public int start() throws IOException {
 		MyTimerTask timerTask = new MyTimerTask();
 		new Timer().scheduleAtFixedRate(timerTask, 0, 600000);
+		//600000
 		String line = "";
 		try(BufferedReader bi = new BufferedReader(new InputStreamReader(System.in))) {
 			int dominantNumber = 0, independentNumber = 0, dependentNumber = 0;
